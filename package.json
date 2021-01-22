@@ -1,12 +1,25 @@
 {
-  "name": "magda-minion-graph",
+  "name": "magda-minion-knowledge-graph",
   "version": "1.0.0",
   "description": "A Magda minion constructs knowledge graph based on datasets metadata.",
   "main": "index.js",
-  "repository": "git@github.com:magda-io/magda-graph-minion.git",
+  "repository": "git@github.com:magda-io/magda-minion-knowledge-graph.git",
   "author": "Jacky Jiang <t83714@gmail.com>",
   "license": "Apache-2.0",
   "private": true,
+  "scripts": {
+    "prebuild": "rimraf dist tsconfig.tsbuildinfo",
+    "build": "yarn run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b --watch",
+    "start": "node dist/index.js",
+    "dev": "run-typescript-in-nodemon src/index.ts",
+    "docker-build-local": "create-docker-context-for-node-component --build --push --tag auto --local",
+    "docker-build-prod": "create-docker-context-for-node-component --build --push --tag auto",
+    "test": "mocha --require ts-node/register --require tsconfig-paths/register \"src/test/**/*.spec.ts\"",
+    "helm-lint": "helm lint deploy/magda-minion-knowledge-graph -f deploy/test-deploy.yaml",
+    "retag-and-push": "retag-and-push"
+  },
   "devDependencies": {
     "@magda/scripts": "^0.0.57-0",
     "husky": "^3.1.0",
@@ -23,7 +36,7 @@
   "config": {
     "registryUrl": "http://localhost:6101/v0",
     "docker": {
-      "name": "data61/magda-minion-graph",
+      "name": "data61/magda-minion-knowledge-graph",
       "include": "node_modules dist psrc Dockerfile package.json"
     },
     "jwtSecret": "squirrel",
