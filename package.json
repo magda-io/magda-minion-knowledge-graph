@@ -24,7 +24,7 @@
     "registryUrl": "http://localhost:6101/v0",
     "docker": {
       "name": "data61/magda-minion-graph",
-      "include": "node_modules dist Dockerfile python_requirements.txt package.json"
+      "include": "node_modules dist psrc Dockerfile package.json"
     },
     "jwtSecret": "squirrel",
     "userId": "00000000-0000-4000-8000-000000000000"
