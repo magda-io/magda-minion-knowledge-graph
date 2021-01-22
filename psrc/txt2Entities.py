@@ -11,7 +11,7 @@ import copy
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_md")
 
 pos = ['NOUN', 'PROPN', 'PRON', 'ADJ', 'VERB']
 mod = ['nsubj', 'conj', 'compound', 'nmod',

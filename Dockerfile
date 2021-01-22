@@ -1,7 +1,9 @@
 FROM ubuntu:20.04
 
+SHELL [ "/bin/bash", "--login", "-c" ]
+
 RUN apt-get update && \
-    apt-get -y install sudo
+    apt-get -y install sudo python3 wget curl git
 
 # Setup non-root user
 RUN adduser --disabled-password --gecos '' admin && \
@@ -13,30 +15,44 @@ RUN adduser --disabled-password --gecos '' admin && \
 
 USER admin
 
-# install python & conda
-RUN cd ~ && \
-    sudo cat /etc/sudoers.d/extras && \
-    sudo apt-get update && \
-    sudo apt-get -y upgrade && \
-    sudo apt-get install -y python3 wget curl git && \
-    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    sudo bash ./Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    sudo conda create --name kg python=3.6 -y
-
 # install nodejs & yarn
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
     sudo apt-get install -y nodejs && \
     sudo npm install --global yarn
 
-# copy source code
-RUN sudo mkdir -p /usr/src/app
-COPY . /usr/src/app
-WORKDIR /usr/src/app/component
+# install miniconda
+ENV HOME=/home/admin
+ENV MINICONDA_VERSION=4.9.2
+ENV CONDA_DIR="${HOME}/miniconda"
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py38_$MINICONDA_VERSION-Linux-x86_64.sh -O ~/miniconda.sh && \
+    chmod +x ~/miniconda.sh && \
+    ~/miniconda.sh -b -p $CONDA_DIR && \
+    rm ~/miniconda.sh
 
-# install python code dependencies
-RUN sudo conda run -n kg pip install -r /usr/src/app/component/psrc/requirements.txt && \
-    sudo conda run -n kg python -m spacy download en_core_web_sm
+# make non-activate conda commands available
+ENV PATH=$CONDA_DIR/bin:$PATH
 
-ENV PATH="/usr/local/miniconda/bin:${PATH}"
+# make conda activate command available from /bin/bash --login shells
+RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
+# make conda activate command available from /bin/bash --interative shells
+RUN conda init bash
+
+# create a project directory inside user home
+ARG PROJECT_DIR="${HOME}/app"
+RUN mkdir -p ${PROJECT_DIR}
+COPY . $PROJECT_DIR
+WORKDIR $PROJECT_DIR/component
+ARG PWD="${PROJECT_DIR}/component"
+
+# build the conda environment
+ENV ENV_PREFIX=$PROJECT_DIR/env
+RUN conda update --name base --channel defaults conda && \
+    conda create --prefix $ENV_PREFIX python=3.6 -y && \
+    conda clean --all --yes
+# run the postBuild script to install any JupyterLab extensions
+RUN cd ${PWD}/psrc && \
+    conda activate $ENV_PREFIX && \
+    pip install -r requirements.txt && \
+    python -m spacy download en_core_web_md
 
 ENTRYPOINT [ "node", "/usr/src/app/component/dist/index.js" ]
