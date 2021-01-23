@@ -1,0 +1,70 @@
+name: CI Release Helm Chart
+
+on:
+  release:
+    types: [published]
+
+env:
+  REPO_NAME: magda-minion-knowledge-graph
+
+jobs:
+  release-helm-chart:
+    name: Release Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn install
+      - run: yarn build
+      - run: yarn test
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.2.0
+
+      - run: yarn helm-lint
+
+      - name: Login to GitHub Package Repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+        run: docker login docker.pkg.github.com -u magdabot -p ${GH_TOKEN}
+
+      - name: Build Docker Image & Push to Github Registry
+        run: yarn docker-build-prod --repository=docker.pkg.github.com/magda-io/${REPO_NAME} --name=${REPO_NAME}
+
+      - name: Login to Docker Hub
+        env:
+          DH_TOKEN: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: docker login -u magdabot -p ${DH_TOKEN}
+
+      - name: Re-tag & Push Docker Image to Docker Hub
+        run: yarn retag-and-push --fromPrefix=docker.pkg.github.com/magda-io/${REPO_NAME}/ --fromName=${REPO_NAME}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Setup AWS CLi Tools
+        uses: chrislennon/action-aws-cli@v1.1
+
+      - name: Release Helm Chart
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_ACCESS_TOKEN }}"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd deploy
+          mkdir -p sync_dir
+          mkdir -p index_dir
+          if ! aws s3 cp s3://magda-charts/index.yaml index_dir/index.yaml; then echo "failed to copy current repo index" && exit 1; fi
+          helm package -d sync_dir ${REPO_NAME}
+          helm repo index --merge "index_dir/index.yaml" sync_dir
+          mv -f sync_dir/index.yaml index_dir/index.yaml
+          aws s3 sync sync_dir s3://magda-charts/ --acl public-read
+          aws s3 cp index_dir/index.yaml s3://magda-charts/index.yaml --acl public-read

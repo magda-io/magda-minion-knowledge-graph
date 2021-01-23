@@ -1,0 +1,34 @@
+name: Main CI Workflow
+
+on: push
+
+env:
+  REPO_NAME: magda-minion-knowledge-graph
+
+jobs:
+  build-test-docker:
+    name: Build, Test & Push to Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn install
+      - run: yarn build
+      - run: yarn test
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.2.0
+
+      - run: yarn helm-lint
+
+      - name: Login to GitHub Package Repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+        run: docker login docker.pkg.github.com -u magdabot -p ${GH_TOKEN}
+      - name: Build Docker Image & Push
+        run: yarn docker-build-prod --repository=docker.pkg.github.com/magda-io/${REPO_NAME} --name=${REPO_NAME} --version=${GITHUB_SHA}

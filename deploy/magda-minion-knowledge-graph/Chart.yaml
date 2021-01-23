@@ -1,0 +1,8 @@
+apiVersion: v2
+name: magda-minion-knowledge-graph
+description: A Helm chart for Magda Format Minion
+version: "1.0.0"
+kubeVersion: ">= 1.14.0-0"
+home: "https://github.com/magda-io/magda-minion-knowledge-graph"
+sources: ["https://github.com/magda-io/magda-minion-knowledge-graph"]
+
