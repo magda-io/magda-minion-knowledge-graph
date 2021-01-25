@@ -3,9 +3,7 @@ from spacy import displacy
 from spacy.tokens import Span
 from spacy.matcher import Matcher
 import networkx as nx
-import sys, json
 from typing import Any, Tuple, Union, Dict, List
-from ast import literal_eval
 
 import copy
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -18,7 +16,7 @@ mod = ['nsubj', 'conj', 'compound', 'nmod',
        'dobj', 'oprd', 'advcl', 'amod', 'appos']
 
 
-def extract_entity(sen):
+def extract_entity(sen: str):
     sen_doc = nlp(sen)
     token_list = []
     for token in sen_doc:
@@ -114,9 +112,3 @@ def get_nodes_from_text(text: str) -> List[Tuple[Tuple[str, str, str], str]]:
     return node_rel_list
 
 
-def main():
-    txt_content = sys.stdin.read()
-    triples = get_nodes_from_text(txt_content)
-    json.dump(triples, sys.stdout)
-
-main()
