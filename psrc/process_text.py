@@ -1,10 +1,10 @@
 import sys, json
-from entity_extraction import get_nodes_from_text
+from entity_extraction import get_entities_from_text
 
 
 def main():
     txt_content = sys.stdin.read()
-    triples = get_nodes_from_text(txt_content)
-    json.dump(triples, sys.stdout)
+    ents = get_entities_from_text(txt_content)
+    json.dump(ents, sys.stdout)
 
 main()

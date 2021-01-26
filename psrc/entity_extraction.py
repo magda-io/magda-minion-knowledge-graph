@@ -112,3 +112,19 @@ def get_nodes_from_text(text: str) -> List[Tuple[Tuple[str, str, str], str]]:
     return node_rel_list
 
 
+INGORE_LABELS = ["CARDINAL","DATE","MONEY","ORDINAL","QUANTITY","TIME","PERCENT"]
+
+def should_ignore_ent(ent: Tuple[str,str,str])-> bool:
+    try:
+        INGORE_LABELS.index(ent[1])
+        return False
+    except:
+        return True
+
+def get_entities_from_text(txt:str):
+    doc = nlp(txt)
+    ents = [(e.text, e.label_, e.kb_id_) for e in doc.ents]
+    text_items = map(lambda ent: ent[0].lower(), filter(should_ignore_ent, ents))
+    text_items = filter(lambda item: item.strip() != "", text_items)
+    return list(set(text_items))
+    
