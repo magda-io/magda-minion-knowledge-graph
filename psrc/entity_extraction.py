@@ -9,7 +9,7 @@ import copy
 from spacy.lang.en.stop_words import STOP_WORDS
 import re
 
-nlp = spacy.load("en_core_web_md")
+nlp = spacy.load("./models/nlp")
 
 pos = ['NOUN', 'PROPN', 'PRON', 'ADJ', 'VERB']
 mod = ['nsubj', 'conj', 'compound', 'nmod',
@@ -124,7 +124,5 @@ def should_ignore_ent(ent: Tuple[str,str,str])-> bool:
 def get_entities_from_text(txt:str):
     doc = nlp(txt)
     ents = [(e.text, e.label_, e.kb_id_) for e in doc.ents]
-    text_items = map(lambda ent: ent[0].lower(), filter(should_ignore_ent, ents))
-    text_items = filter(lambda item: item.strip() != "", text_items)
-    return list(set(text_items))
+    return ents
     

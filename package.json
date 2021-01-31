@@ -22,6 +22,8 @@
   },
   "devDependencies": {
     "@magda/scripts": "^0.0.57-0",
+    "@types/node": "^12.19.15",
+    "@types/tar": "^4.0.4",
     "husky": "^3.1.0",
     "prettier": "^1.19.1",
     "pretty-quick": "^2.0.1",
@@ -31,7 +33,8 @@
   "dependencies": {
     "@magda/minion-sdk": "^0.0.59",
     "@magda/registry-aspects": "^0.0.59",
-    "@magda/utils": "^0.0.59"
+    "@magda/utils": "^0.0.59",
+    "tar": "^6.1.0"
   },
   "config": {
     "registryUrl": "http://localhost:6101/v0",

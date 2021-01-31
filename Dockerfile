@@ -40,7 +40,7 @@ RUN conda init bash
 # create a project directory inside user home
 ARG PROJECT_DIR="${HOME}/app"
 RUN mkdir -p ${PROJECT_DIR}
-COPY . $PROJECT_DIR
+COPY --chown=admin:admin . $PROJECT_DIR
 WORKDIR $PROJECT_DIR/component
 ARG PWD="${PROJECT_DIR}/component"
 
@@ -52,7 +52,6 @@ RUN conda update --name base --channel defaults conda && \
 # run the postBuild script to install any JupyterLab extensions
 RUN cd ${PWD}/psrc && \
     conda activate $ENV_PREFIX && \
-    pip install -r requirements.txt && \
-    python -m spacy download en_core_web_md
+    pip install -r requirements.txt
 
-ENTRYPOINT [ "node", "/usr/src/app/component/dist/index.js" ]
+ENTRYPOINT conda activate $ENV_PREFIX && node ${PWD}/dist/index.js
