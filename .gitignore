@@ -105,3 +105,6 @@ dist
 
 #Python cache file
 __pycache__/
+
+# uncompressed language model files
+psrc/models/nlp/

@@ -1,19 +1,17 @@
 import { exec } from "child_process";
 import { Readable } from "stream";
 
-type ReturnedDataType = { [k: string]: any } | null;
-
 const env = {
     ...process.env
 };
 
 const MAX_BUFFER = 1024 * 1024 * 10;
 
-export default function executePython(
+export default function executePython<T = any>(
     pythonScriptPath: string,
     input?: string,
     cwd?: string
-): Promise<ReturnedDataType> {
+): Promise<T | null> {
     return new Promise((resolve, reject) => {
         const options = {
             env: env,
@@ -38,7 +36,7 @@ export default function executePython(
                         if (!stdout) {
                             resolve(null);
                         } else {
-                            resolve(JSON.parse(stdout as string));
+                            resolve(JSON.parse(stdout as string) as T);
                         }
                     }
                 } catch (e) {

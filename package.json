@@ -22,19 +22,27 @@
   },
   "devDependencies": {
     "@magda/scripts": "^0.0.57-0",
+    "@types/natural": "^2.1.1",
     "@types/node": "^12.19.15",
+    "@types/node-fetch": "^2.5.8",
+    "@types/stopword": "^1.0.0",
     "@types/tar": "^4.0.4",
     "husky": "^3.1.0",
     "prettier": "^1.19.1",
     "pretty-quick": "^2.0.1",
     "rimraf": "^3.0.0",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "wikibase-types": "^0.2.1"
   },
   "dependencies": {
     "@magda/minion-sdk": "^0.0.59",
     "@magda/registry-aspects": "^0.0.59",
     "@magda/utils": "^0.0.59",
-    "tar": "^6.1.0"
+    "natural": "^2.4.5",
+    "node-fetch": "^2.6.1",
+    "stopword": "^1.0.6",
+    "tar": "^6.1.0",
+    "wikidata-sdk": "^7.9.0"
   },
   "config": {
     "registryUrl": "http://localhost:6101/v0",

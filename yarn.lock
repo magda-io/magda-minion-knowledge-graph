@@ -180,6 +180,21 @@
   dependencies:
     "@types/node" "*"
 
+"@types/natural@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/natural/-/natural-2.1.1.tgz#761232e1518d7ecb551af63c53e65709de09d8d3"
+  integrity sha512-FsDESOG70ni89e6DFZHMVvqRWrQWB8H2ad8+10qUAIGA5JX1td0NfSM/qyO4KQVkqOne/8+tNeLTDiDZsH9Dkg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/node-fetch@^2.5.8":
+  version "2.5.8"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.8.tgz#e199c835d234c7eb0846f6618012e558544ee2fb"
+  integrity sha512-fbjI6ja0N5ZA8TV53RUqzsKNkl9fv8Oj3T7zxW7FGv1GSH7gwJaNF8dzCjrqKaxKeUpTz4yT1DaJFq/omNpGfw==
+  dependencies:
+    "@types/node" "*"
+    form-data "^3.0.0"
+
 "@types/node@*":
   version "14.14.22"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.22.tgz#0d29f382472c4ccf3bd96ff0ce47daf5b7b84b18"
@@ -223,6 +238,11 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
+"@types/stopword@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/stopword/-/stopword-1.0.0.tgz#ed69928f10d004c5d0b2deb7911bf093f76bfe40"
+  integrity sha512-YoHfYHykG6w2vSzy7CUfxDTzOc/HBbu5T5XSzZ1YVQxPVrBsQl25quzmA/c8Jf9P+KF7iXM/iwkW3ugSpyZoZA==
+
 "@types/tar@^4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@types/tar/-/tar-4.0.4.tgz#d680de60855e7778a51c672b755869a3b8d2889f"
@@ -250,6 +270,11 @@ abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
   integrity sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
+
+afinn-165@^1.0.2:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/afinn-165/-/afinn-165-1.0.4.tgz#3abf6b8922dd5db84d84e0abd155924381dd73a4"
+  integrity sha512-7+Wlx3BImrK0HiG6y3lU4xX7SpBPSSu8T9iguPMlaueRFxjbYwAQrp9lqZUuFikqKbd/en8lVREILvP2J80uJA==
 
 ajv@^6.10.2, ajv@^6.12.3:
   version "6.12.6"
@@ -344,6 +369,13 @@ apidoc-core@~0.8.2:
     markdown-it "^8.3.1"
     nomnom "~1.8.1"
     winston "~2.3.1"
+
+apparatus@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/apparatus/-/apparatus-0.0.10.tgz#81ea756772ada77863db54ceee8202c109bdca3e"
+  integrity sha512-KLy/ugo33KZA7nugtQ7O0E1c8kQ52N3IvD/XgIh4w/Nr28ypfkwDfA67F1ev4N1m5D+BOk1+b2dEJDfpj/VvZg==
+  dependencies:
+    sylvester ">= 0.0.8"
 
 aproba@^1.0.3:
   version "1.2.0"
@@ -790,7 +822,7 @@ colors@1.0.x:
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.0.3.tgz#0433f44d809680fdeb60ed260f1b0c262e82a40b"
   integrity sha1-BDP0TYCWgP3rYO0mDxsMJi6CpAs=
 
-combined-stream@^1.0.6, combined-stream@~1.0.6:
+combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.8.tgz#c3d45a8b34fd730631a110a8a2520682b31d5a7f"
   integrity sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==
@@ -1297,6 +1329,15 @@ form-data@^2.5.0:
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.6"
+    mime-types "^2.1.12"
+
+form-data@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.0.tgz#31b7e39c85f1355b7139ee0c647cf0de7f83c682"
+  integrity sha512-CKMFDglpbMi6PyN+brwB9Q/GOw0eAnsrEZDgcsH5Krhz5Od/haKHAX0NmQfha2zPPz0JpWzA7GJHGSnvCRLWsg==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
 form-data@~2.3.2:
@@ -2002,6 +2043,13 @@ json-schema@0.2.3:
   resolved "https://registry.yarnpkg.com/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
   integrity sha1-tIDIkuWaLwWVTOcnvT8qTogvnhM=
 
+json-stable-stringify@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.0.1.tgz#9a759d39c5f2ff503fd5300646ed445f88c4f9af"
+  integrity sha1-mnWdOcXy/1A/1TAGRu1EX4jE+a8=
+  dependencies:
+    jsonify "~0.0.0"
+
 json-stringify-safe@~5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
@@ -2034,6 +2082,11 @@ jsonfile@^4.0.0:
   integrity sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=
   optionalDependencies:
     graceful-fs "^4.1.6"
+
+jsonify@~0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.0.tgz#2c74b6ee41d93ca51b7b5aaee8f503631d252a73"
+  integrity sha1-LHS27kHZPKUbe1qu6PUDYx0lKnM=
 
 jsprim@^1.2.2:
   version "1.4.1"
@@ -2386,6 +2439,18 @@ nanomatch@^1.2.9:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+natural@^2.4.5:
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/natural/-/natural-2.4.5.tgz#6507e445b204071e54daebe02a5914eb966f5ea5"
+  integrity sha512-fxQou4ubo6Rzf7XL0jjwtC2vHm6Sdicu7ztcE0k1ODZs+d1UzcKF1Hu2IwE2y7OgzU3Sa9o8obw7rnyNrjsd1A==
+  dependencies:
+    afinn-165 "^1.0.2"
+    apparatus "^0.0.10"
+    json-stable-stringify "^1.0.1"
+    sylvester "^0.0.12"
+    underscore "^1.9.1"
+    wordnet-db "^3.1.11"
+
 needle@^2.5.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/needle/-/needle-2.6.0.tgz#24dbb55f2509e2324b4a99d61f413982013ccdbe"
@@ -2404,6 +2469,11 @@ node-addon-api@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.1.0.tgz#98b21931557466c6729e51cb77cd39c965f42239"
   integrity sha512-flmrDNB06LIl5lywUz7YlNGZH/5p0M7W28k8hzd9Lshtdh1wshD2Y+U4h9LD6KObOy1f+fEVdgprPrEymjM5uw==
+
+node-fetch@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
 node-pre-gyp@0.15.0:
   version "0.15.0"
@@ -3456,6 +3526,11 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
+stopword@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/stopword/-/stopword-1.0.6.tgz#404944f0b756583d9194d2ad81bd7cdedc4d2a56"
+  integrity sha512-8ff3zaY1mLOQGSL/lzl9K6nMHbpFEalscwBtTbh8hWjPbkyPcntr25+PVB251xWGX1rUjDLzPWIw38ZcKJ+GAw==
+
 stream-chain@^2.2.3:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/stream-chain/-/stream-chain-2.2.4.tgz#2e5e9858e00d25ebaf7e4339e8328ddcab5facad"
@@ -3574,6 +3649,16 @@ supports-color@^7.1.0:
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
   dependencies:
     has-flag "^4.0.0"
+
+"sylvester@>= 0.0.8":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/sylvester/-/sylvester-0.0.21.tgz#2987b1ce2bd2f38b0dce2a34388884bfa4400ea7"
+  integrity sha1-KYexzivS84sNzio0OIiEv6RADqc=
+
+sylvester@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/sylvester/-/sylvester-0.0.12.tgz#5a884415cd2d002c57e7a3aac99462a75ce9fdb4"
+  integrity sha1-WohEFc0tACxX56OqyZRip1zp/bQ=
 
 table@^5.3.3:
   version "5.4.6"
@@ -3775,6 +3860,11 @@ undefsafe@^2.0.2:
   dependencies:
     debug "^2.2.0"
 
+underscore@^1.9.1:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.0.tgz#4814940551fc80587cef7840d1ebb0f16453be97"
+  integrity sha512-21rQzss/XPMjolTiIezSu3JAjgagXKROtNrYFEOWK109qY1Uv2tVjPTZ1ci2HgvQDA16gHYSthQIJfB+XId/rQ==
+
 underscore@~1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.6.0.tgz#8b38b10cacdef63337b8b24e4ff86d45aea529a8"
@@ -3934,6 +4024,23 @@ widest-line@^2.0.0:
   dependencies:
     string-width "^2.1.1"
 
+wikibase-sdk@^7.9.0:
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/wikibase-sdk/-/wikibase-sdk-7.9.0.tgz#a83b016309a3e196072431445b63a82e3e177122"
+  integrity sha512-VMZEtn9uX+R6mgbPZD7LqrDETvXQAOjdyVDFwqgYfvPHTN1/q+6BlJr4LUeLu2TWN7ac+8A1Je9gzCVJRoNFtQ==
+
+wikibase-types@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/wikibase-types/-/wikibase-types-0.2.1.tgz#6f2a78af706f548a45172521ca56fa422fbb12e2"
+  integrity sha512-r7kw3L3AYwZ27Pebkbk23eaDq9iWNtkWoaUgIgFfSl9YxsGhGw2R9/0BaWLGwauQBom9BNhFNzhNa2f4tXUUgw==
+
+wikidata-sdk@^7.9.0:
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/wikidata-sdk/-/wikidata-sdk-7.9.0.tgz#12044d2fa58707d0ee4eded7cac19a84b2ff45ff"
+  integrity sha512-trPbNdbriBOvkW3bCNZjHNuIKVqhnJGKl9VY1KAPDajL9hg1rBU1UhPMvseBU/NAZB2KRl7jW3mhexEX4HrPfQ==
+  dependencies:
+    wikibase-sdk "^7.9.0"
+
 winston@~2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/winston/-/winston-2.3.1.tgz#0b48420d978c01804cf0230b648861598225a119"
@@ -3950,6 +4057,11 @@ word-wrap@~1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"
   integrity sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==
+
+wordnet-db@^3.1.11:
+  version "3.1.14"
+  resolved "https://registry.yarnpkg.com/wordnet-db/-/wordnet-db-3.1.14.tgz#7ba1ec2cb5730393f0856efcc738a60085426199"
+  integrity sha512-zVyFsvE+mq9MCmwXUWHIcpfbrHHClZWZiVOzKSxNJruIcFn2RbY55zkhiAMMxM8zCVSmtNiViq8FsAZSFpMYag==
 
 wrap-ansi@^2.0.0:
   version "2.1.0"

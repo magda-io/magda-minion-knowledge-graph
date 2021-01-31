@@ -1,7 +1,6 @@
 import minion, { commonYargs } from "@magda/minion-sdk";
 import onRecordFound from "./onRecordFound";
-import formatAspectDef from "./formatAspectDef";
-import executePython from "./executePython";
+import wikiEntitiesAspectDef from "./wikiEntitiesAspectDef";
 import path from "path";
 import fs from "fs";
 import tar from "tar";
@@ -9,43 +8,32 @@ import tar from "tar";
 // unzip nlp model files
 if (!fs.existsSync("./psrc/models/nlp")) {
     const NLP_MODLE_PATH = path.resolve(
-        "./psrc/models/en_entity_linking_wiki_01_lg.tar.gz"
+        "./psrc/models/en_entity_linking_wiki_03_lg.tar.gz"
     );
+
+    console.log("Uncompressing entity linking language model...");
 
     tar.x({
         cwd: path.dirname(NLP_MODLE_PATH),
         file: NLP_MODLE_PATH,
-        sync: true
+        sync: true,
+        onwarn: message => console.log("Model Uncompression WARN: " + message)
     });
+
+    console.log("Entity linking language model uncompress completed!");
 }
 
 const ID = "minion-knowledge-graph";
 
-const argv = commonYargs(6115, "http://localhost:6115");
-
-(async () => {
-    const r = await executePython(
-        "process_text.py",
-        `
-    Taxation statistics: an overview of the income and tax status of Australian individuals, companies, partnerships, trusts and funds for 2017-18.
-
-For more info see: https://www.ato.gov.au/About-ATO/Research-and-statistics/In-detail/Taxation-statistics/Taxation-statistics-2017-18/
-    `,
-        path.resolve("./psrc")
-    );
-
-    console.log(r);
-})().catch(e => {
-    console.error(e);
-});
+const argv = commonYargs(6115, "http://localhost:6123");
 
 minion({
     argv,
     id: ID,
-    aspects: ["dcat-distribution-strings"],
+    aspects: ["dcat-dataset-strings"],
     optionalAspects: [],
-    async: false,
-    writeAspectDefs: [formatAspectDef],
+    async: true,
+    writeAspectDefs: [wikiEntitiesAspectDef],
     onRecordFound
 }).catch(e => {
     console.error("Error:" + e.message, e);
