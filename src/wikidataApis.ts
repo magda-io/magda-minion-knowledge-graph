@@ -5,6 +5,35 @@ import wdk, {
 import { Entity, SearchResult, SparqlResults } from "wikibase-types";
 import fetch from "node-fetch";
 
+let wikiApiAccessPromise: null | Promise<any> = null;
+
+async function request<T>(url: string, body?: string): Promise<T> {
+    while (wikiApiAccessPromise) {
+        // make sure there is one current request to wikidata api
+        const waitingPromise = wikiApiAccessPromise;
+        try {
+            await waitingPromise;
+        } catch (e) {}
+        if (waitingPromise === wikiApiAccessPromise) {
+            wikiApiAccessPromise = null;
+        }
+    }
+
+    let req;
+    if (body) {
+        req = fetch(url, {
+            method: "POST",
+            body,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        });
+    } else {
+        req = fetch(url);
+    }
+    wikiApiAccessPromise = req;
+    const res = await req;
+    return await res.json();
+}
+
 export async function searchEntities(
     search: string | SearchEntitiesOptionsType,
     language?: string,
@@ -14,8 +43,7 @@ export async function searchEntities(
 ): Promise<SearchResult[]> {
     language = language ? language : "en";
     const url = wdk.searchEntities(search, language, limit, format, uselang);
-    const res = await fetch(url);
-    const resData = await res.json();
+    const resData = await request<any>(url);
     const searchResult = resData?.search as SearchResult[];
 
     if (!searchResult?.length) {
@@ -34,8 +62,7 @@ export async function getEntities(
 ): Promise<Entity[]> {
     languages = languages ? languages : ["en"];
     const url = wdk.getEntities(ids, languages, props, format, redirects);
-    const res = await fetch(url);
-    const resData = await res.json();
+    const resData = await request<any>(url);
     const parsedData = wdk.parse.wd.entities(resData);
     if (!parsedData) {
         return [];
@@ -60,8 +87,7 @@ export async function getManyEntities(
 
     for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
-        const res = await fetch(url);
-        const resData = await res.json();
+        const resData = await request<any>(url);
         const parsedData = wdk.parse.wd.entities(resData);
         entities = entities.concat(parsedData ? Object.values(parsedData) : []);
     }
@@ -83,8 +109,7 @@ export async function getReverseClaims(
     options?: GetReverseClaimsOptionsTypeWithExtras
 ): Promise<Entity[]> {
     const url = wdk.getReverseClaims(property, value, options);
-    const res = await fetch(url);
-    const resData = (await res.json()) as SparqlResults;
+    const resData = await request<SparqlResults>(url);
     const entitiesIds = wdk.simplify.sparqlResults<string[]>(resData, {
         minimize: true
     });
@@ -113,11 +138,6 @@ export async function sparqlQuery<T = any>(
         options.minimize = true;
     }
     const [url, body] = wdk.sparqlQuery(sparql).split("?");
-    const res = await fetch(url, {
-        method: "POST",
-        body,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    });
-    const resData = (await res.json()) as SparqlResults;
+    const resData = await request<SparqlResults>(url, body);
     return wdk.simplify.sparqlResults<T>(resData, options);
 }
