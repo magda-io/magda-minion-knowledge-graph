@@ -6,6 +6,8 @@ import fs from "fs";
 import tar from "tar";
 import http from "http";
 import { Writable } from "stream";
+import neo4j from "neo4j-driver";
+import { partial } from "lodash";
 
 const nlpModelPromise = new Promise((resolve, reject) => {
     // unzip nlp model files
@@ -38,7 +40,29 @@ nlpModelPromise
     .then(() => {
         const ID = "minion-knowledge-graph";
 
-        const argv = commonYargs(6115, "http://localhost:6123");
+        const argv = commonYargs(6123, "http://localhost:6123", yargs =>
+            yargs
+                .options("neo4jUrl", {
+                    describe: "the neo4j DB in cluster access url.",
+                    require: true,
+                    type: "string"
+                })
+                .options("neo4jUser", {
+                    describe: "the neo4j DB username",
+                    default: "neo4j",
+                    type: "string"
+                })
+                .options("neo4jPassword", {
+                    describe: "the neo4j DB password",
+                    require: true,
+                    type: "string"
+                })
+        );
+
+        const driver = neo4j.driver(
+            argv.neo4jUrl,
+            neo4j.auth.basic(argv.neo4jUser, argv.neo4jPassword)
+        );
 
         minion({
             argv,
@@ -47,7 +71,7 @@ nlpModelPromise
             optionalAspects: [],
             async: true,
             writeAspectDefs: [wikiEntitiesAspectDef],
-            onRecordFound
+            onRecordFound: partial(onRecordFound, driver)
         }).catch(e => {
             console.error("Error:" + e.message, e);
             process.exit(1);

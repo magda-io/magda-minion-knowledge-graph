@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@magda/scripts": "^0.0.57-0",
+    "@types/lodash": "^4.14.168",
     "@types/natural": "^2.1.1",
     "@types/node": "^12.19.15",
     "@types/node-fetch": "^2.5.8",
@@ -38,7 +39,9 @@
     "@magda/minion-sdk": "^0.0.59",
     "@magda/registry-aspects": "^0.0.59",
     "@magda/utils": "^0.0.59",
+    "lodash": "^4.17.20",
     "natural": "^2.4.5",
+    "neo4j-driver": "^4.2.2",
     "node-fetch": "^2.6.1",
     "stopword": "^1.0.6",
     "tar": "^6.1.0",
