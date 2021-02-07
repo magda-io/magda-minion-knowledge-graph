@@ -1,8 +1,9 @@
 import wdk, {
     SearchEntitiesOptionsType,
-    GetReverseClaimsOptionsType
+    GetReverseClaimsOptionsType,
+    MinimisedEntity
 } from "wikidata-sdk";
-import { Entity, SearchResult, SparqlResults } from "wikibase-types";
+import { SearchResult, SparqlResults } from "wikibase-types";
 import fetch from "node-fetch";
 
 let wikiApiAccessPromise: null | Promise<any> = null;
@@ -53,42 +54,42 @@ export async function searchEntities(
     }
 }
 
-export async function getEntities(
+export async function getEntities<T = MinimisedEntity>(
     ids: string[],
     languages?: string[],
     props?: string[],
     format?: string,
     redirects?: boolean
-): Promise<Entity[]> {
+): Promise<T[]> {
     languages = languages ? languages : ["en"];
     const url = wdk.getEntities(ids, languages, props, format, redirects);
     const resData = await request<any>(url);
-    const parsedData = wdk.parse.wd.entities(resData);
+    const parsedData = wdk.parse.wd.entities<T>(resData);
     if (!parsedData) {
         return [];
     }
     return Object.values(parsedData);
 }
 
-export async function getManyEntities(
+export async function getManyEntities<T = MinimisedEntity>(
     ids: string[] | string[][],
     languages?: string[],
     props?: string[],
     format?: string,
     redirects?: boolean
-): Promise<Entity[]> {
+): Promise<T[]> {
     languages = languages ? languages : ["en"];
     const urls = wdk.getManyEntities(ids, languages, props, format, redirects);
     if (!urls?.length) {
         throw new Error("Invalid wikibase API request url array generated.");
     }
 
-    let entities = [] as Entity[];
+    let entities = [] as T[];
 
     for (let i = 0; i < urls.length; i++) {
         const url = urls[i];
         const resData = await request<any>(url);
-        const parsedData = wdk.parse.wd.entities(resData);
+        const parsedData = wdk.parse.wd.entities<T>(resData);
         entities = entities.concat(parsedData ? Object.values(parsedData) : []);
     }
 
@@ -107,7 +108,7 @@ export async function getReverseClaims(
     property: string | string[],
     value: string | string[],
     options?: GetReverseClaimsOptionsTypeWithExtras
-): Promise<Entity[]> {
+): Promise<MinimisedEntity[]> {
     const url = wdk.getReverseClaims(property, value, options);
     const resData = await request<SparqlResults>(url);
     const entitiesIds = wdk.simplify.sparqlResults<string[]>(resData, {

@@ -28,7 +28,17 @@ defaultAdminUserId: "00000000-0000-4000-8000-000000000000"
 
 resources:
   requests:
-    cpu: 10m
-    memory: 30Mi
+    cpu: 50m
+    memory: 300Mi
   limits:
     cpu: 100m
+
+neo4j:
+  # -- neo4j DB access url in cluster 
+  url: bolt://graph-db:7687
+  # -- neo4j DB access username
+  username: neo4j
+  # -- neo4j DB access password.
+  # leave blank will auto-load from the secret.
+  password: 
+

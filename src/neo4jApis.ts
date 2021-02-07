@@ -1,4 +1,5 @@
 import { Transaction, Node, Relationship, Integer } from "neo4j-driver";
+import urijs from "urijs";
 
 type PropType = {
     [key: string]: any;
@@ -61,17 +62,18 @@ export async function createRelationship(
 /**
  * find nodes by props or labels
  *
- * @template T
+ * @export
  * @param {Transaction} txc
  * @param {PropType} [props={}]
  * @param {string[]} [labels=[]]
- * @return {*}  {Promise<T[]>}
+ * @param {number} [limit=300] no of the record to be fetched. Default: 300
+ * @return {*}  {Promise<Node[]>}
  */
 export async function findNodes(
     txc: Transaction,
     props: PropType = {},
     labels: string[] = [],
-    limit?: number
+    limit: number = 300
 ): Promise<Node[]> {
     const labelStr = labels.map(item => `:${item}`).join("");
     const propsMatchStr = Object.keys(props)
@@ -130,3 +132,49 @@ export async function getRelationshipBetweenNodes(
     );
     return result.records.map(item => item.get("r") as Relationship);
 }
+
+export class UriNamespace {
+    private namespaceUriObj: URI;
+    private namespace: string;
+
+    constructor(namespace: string) {
+        if (!namespace) {
+            throw new Error("Namespace cannot be empty!");
+        }
+        this.namespace = namespace;
+        this.namespaceUriObj = urijs(namespace);
+    }
+
+    toString() {
+        return this.namespace;
+    }
+
+    getUriFromId(id: string) {
+        return this.namespace[this.namespace.length - 1] === "#"
+            ? this.namespaceUriObj
+                  .clone()
+                  .fragment(id)
+                  .toString()
+            : this.namespaceUriObj
+                  .clone()
+                  .segmentCoded(id)
+                  .toString();
+    }
+
+    getIdFromUri(uri: string) {
+        const uriObj = urijs(uri);
+        const fragment = uriObj.fragment();
+        if (fragment) {
+            return fragment;
+        } else {
+            return uriObj.segmentCoded(-1);
+        }
+    }
+}
+
+export const namespaceList = {
+    magdaItem: new UriNamespace("https://magda.io/ns/registry-record/"),
+    magdaRel: new UriNamespace("https://magda.io/ns/kg-rel/"),
+    wd: new UriNamespace("http://www.wikidata.org/entity/"),
+    wdt: new UriNamespace("http://www.wikidata.org/prop/direct/")
+};

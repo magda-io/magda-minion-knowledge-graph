@@ -39,12 +39,14 @@
     "@magda/minion-sdk": "^0.0.59",
     "@magda/registry-aspects": "^0.0.59",
     "@magda/utils": "^0.0.59",
+    "@types/urijs": "^1.19.14",
     "lodash": "^4.17.20",
     "natural": "^2.4.5",
     "neo4j-driver": "^4.2.2",
     "node-fetch": "^2.6.1",
     "stopword": "^1.0.6",
     "tar": "^6.1.0",
+    "urijs": "^1.19.5",
     "wikidata-sdk": "^7.9.0"
   },
   "config": {

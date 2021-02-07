@@ -4,13 +4,35 @@ declare module "*.json" {
 }
 
 declare module "wikidata-sdk" {
-    import { Claim, Entity, SparqlResults } from "wikibase-types";
+    import { Claim, SparqlResults } from "wikibase-types";
+
+    export type MinimisedClaimValueType = number | string | [number, number];
+
+    export interface MinimisedEntity {
+        readonly type: string;
+        readonly datatype?: string;
+        readonly id: string;
+        readonly pageid?: number;
+        readonly ns?: number;
+        readonly title?: string;
+        readonly lastrevid?: number;
+        readonly modified?: string;
+        readonly redirects?: {
+            readonly from: string;
+            readonly to: string;
+        };
+        readonly aliases?: Record<string, readonly string[]>;
+        readonly claims?: Record<string, readonly MinimisedClaimValueType[]>;
+        readonly descriptions?: Record<string, string>;
+        readonly labels?: Record<string, string>;
+        readonly sitelinks?: Record<string, string>;
+    }
 
     export const parse: {
         wd: {
-            entities<T = any>(
-                res: T | { body: T; [key: string]: any }
-            ): { [id: string]: Entity };
+            entities<T = MinimisedEntity, RT = any>(
+                res: RT | { body: RT; [key: string]: any }
+            ): { [id: string]: T };
         };
     };
 
@@ -71,17 +93,17 @@ declare module "wikidata-sdk" {
     function sparqlQuery(sparql: string): string;
 
     // helpers
-    function isEntityId(value: string): boolean;
-    function isItemId(value: string): boolean;
-    function isPropertyId(value: string): boolean;
-    function isLexemeId(value: string): boolean;
-    function isFormId(value: string): boolean;
-    function isSenseId(value: string): boolean;
-    function isGuid(value: string): boolean;
-    function isHash(value: string): boolean;
+    function isEntityId(value: any): boolean;
+    function isItemId(value: any): boolean;
+    function isPropertyId(value: any): boolean;
+    function isLexemeId(value: any): boolean;
+    function isFormId(value: any): boolean;
+    function isSenseId(value: any): boolean;
+    function isGuid(value: any): boolean;
+    function isHash(value: any): boolean;
     function isPropertyClaimsId(value: string): boolean;
-    function isRevisionId(value: string): boolean;
-    function isNumericId(value: string): boolean;
+    function isRevisionId(value: any): boolean;
+    function isNumericId(value: any): boolean;
     function getNumericId(value: string): boolean;
 
     function truthyClaims(
