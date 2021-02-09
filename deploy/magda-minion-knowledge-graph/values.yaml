@@ -28,10 +28,10 @@ defaultAdminUserId: "00000000-0000-4000-8000-000000000000"
 
 resources:
   requests:
-    cpu: 50m
-    memory: 300Mi
+    cpu: 500m
+    memory: 5000Mi
   limits:
-    cpu: 100m
+    cpu: 1000m
 
 neo4j:
   # -- neo4j DB access url in cluster 
