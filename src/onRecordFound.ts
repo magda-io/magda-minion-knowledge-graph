@@ -75,8 +75,10 @@ async function processRecord(
         name: nameLabelList[item.kb_id]
     }));
 
-    await updateRegistry(record, registry, entities);
-    await updateGraphDb(neo4jDriver, record, wikiEnityitems);
+    await Promise.all([
+        await updateRegistry(record, registry, entities),
+        await updateGraphDb(neo4jDriver, record, wikiEnityitems)
+    ]);
 }
 
 async function processTextWithNlpModel(text: string): Promise<WikiEnity[]> {
@@ -146,7 +148,8 @@ async function updateRegistry(
     await registry.putRecordAspect(
         record.id,
         "dataset-wiki-entities",
-        entities
+        entities,
+        record.tenantId
     );
 }
 
