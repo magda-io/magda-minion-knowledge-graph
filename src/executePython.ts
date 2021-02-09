@@ -27,7 +27,10 @@ export default function executePython<T = any>(
             (error, stdout, stderr) => {
                 try {
                     if (error) {
-                        reject(error);
+                        const detailsMessage = `${error}${
+                            stderr ? `:${stderr}` : stdout ? `:${stdout}` : ""
+                        }`;
+                        reject(new Error(detailsMessage));
                         return;
                     } else if (stderr) {
                         reject(new Error(stderr as string));

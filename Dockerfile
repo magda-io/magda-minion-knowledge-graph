@@ -3,7 +3,8 @@ FROM ubuntu:20.04
 SHELL [ "/bin/bash", "--login", "-c" ]
 
 RUN apt-get update && \
-    apt-get -y install sudo python3 wget curl git
+    apt-get -y install sudo python3 wget curl git && \
+    apt-get clean
 
 # Setup non-root user
 RUN adduser --disabled-password --gecos '' admin && \
@@ -18,6 +19,7 @@ USER admin
 # install nodejs & yarn
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
     sudo apt-get install -y nodejs && \
+    sudo apt-get clean && \
     sudo npm install --global yarn
 
 # install miniconda
@@ -52,6 +54,7 @@ RUN conda update --name base --channel defaults conda && \
 # run the postBuild script to install any JupyterLab extensions
 RUN cd ${PWD}/psrc && \
     conda activate $ENV_PREFIX && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt && \
+    rm -rf ~/.cache/pip
 
 ENTRYPOINT conda activate $ENV_PREFIX && node ${PWD}/dist/index.js

@@ -4,35 +4,50 @@ import wikiEntitiesAspectDef from "./wikiEntitiesAspectDef";
 import path from "path";
 import fs from "fs";
 import tar from "tar";
-import http from "http";
+import { pipeRemoteFile, pipeLocalFile } from "./utils";
 import { Writable } from "stream";
 import neo4j from "neo4j-driver";
 import { partial } from "lodash";
 
+const NLP_MODLE_PATH = path.resolve("./psrc/models");
+const DEFAULT_MODLE_FILE_NAME = "en_entity_linking_wiki_03_lg.tar.gz";
+const DEFAULT_NLP_MODLE_FILE_PATH = path.resolve(
+    `./psrc/models/${DEFAULT_MODLE_FILE_NAME}`
+);
+const DEFAULT_NLP_MODLE_URL = `https://magda-files.s3-ap-southeast-2.amazonaws.com/nlp_models/${DEFAULT_MODLE_FILE_NAME}`;
+
 const nlpModelPromise = new Promise((resolve, reject) => {
     // unzip nlp model files
     if (fs.existsSync("./psrc/models/nlp")) {
+        console.log("Decompressed model found. Skip model preparation.");
         resolve();
+        return;
     }
-
-    const NLP_MODLE_URL =
-        "https://magda-files.s3-ap-southeast-2.amazonaws.com/nlp_models/en_entity_linking_wiki_03_lg.tar.gz";
-    const NLP_MODLE_PATH = path.resolve("./psrc/models");
-
-    console.log("Uncompressing entity linking language model...");
 
     const stream = tar.x({
         cwd: NLP_MODLE_PATH,
         onwarn: message => console.log("Model Uncompression WARN: " + message)
     }) as Writable;
 
-    http.get(NLP_MODLE_URL, function(res) {
-        res.on("error", reject).pipe(stream);
-    });
+    const localCompressedModelFilePath = process?.env?.["NLP_MODEL_FILE_PATH"]
+        ? process.env["NLP_MODEL_FILE_PATH"]
+        : DEFAULT_NLP_MODLE_FILE_PATH;
+
+    if (fs.existsSync(localCompressedModelFilePath)) {
+        console.log(
+            `Locate compressed model file: ${localCompressedModelFilePath}, start to decompress model file...`
+        );
+        pipeLocalFile(localCompressedModelFilePath, stream, reject);
+    } else {
+        console.log(
+            `Downloading & decompressing model file from ${localCompressedModelFilePath}...`
+        );
+        pipeRemoteFile(DEFAULT_NLP_MODLE_URL, stream, reject);
+    }
 
     stream.on("error", reject).on("close", () => {
         resolve();
-        console.log("Entity linking language model uncompress completed!");
+        console.log("Decompress entity linking language model file completed!");
     });
 });
 
@@ -44,27 +59,35 @@ nlpModelPromise
             yargs
                 .options("neo4jUrl", {
                     describe: "the neo4j DB in cluster access url.",
-                    require: true,
+                    default: process.env.NEO4J_URL,
                     type: "string"
                 })
                 .options("neo4jUser", {
                     describe: "the neo4j DB username",
-                    default: "neo4j",
+                    default: process.env.NEO4J_USERNAME,
                     type: "string"
                 })
                 .options("neo4jPassword", {
                     describe: "the neo4j DB password",
-                    require: true,
+                    default: process.env.NEO4J_PASSWORD,
                     type: "string"
                 })
         );
+
+        if (!argv.neo4jUrl) {
+            throw new Error("`neo4jUrl` cannot be empty!");
+        }
+
+        if (!argv.neo4jUser) {
+            throw new Error("`neo4jUser` cannot be empty!");
+        }
 
         const driver = neo4j.driver(
             argv.neo4jUrl,
             neo4j.auth.basic(argv.neo4jUser, argv.neo4jPassword)
         );
 
-        minion({
+        return minion({
             argv,
             id: ID,
             aspects: ["dcat-dataset-strings"],

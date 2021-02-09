@@ -23,6 +23,22 @@ See chart value file for details of the logic used to generate this setting valu
       imagePullSecrets:
       - name: {{ $imagePullSecret }}
       {{- end }}
+      volumes:
+      - name: tmp-model-file-dir
+        emptyDir: {}
+      initContainers:
+      - name: model-file-downloader
+        image: "inutano/wget:1.20.3-r1"
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "wget $NLP_MODEL_FILE_URI -O $NLP_MODEL_FILE_PATH"]
+        env:
+          - name: NLP_MODEL_FILE_URI
+            value: "https://magda-files.s3-ap-southeast-2.amazonaws.com/nlp_models/en_entity_linking_wiki_03_lg.tar.gz"
+          - name: NLP_MODEL_FILE_PATH
+            value: "/tmp-nlp-model-dir/en_entity_linking_wiki_03_lg.tar.gz"
+        volumeMounts:
+          - name: tmp-model-file-dir
+            mountPath: /tmp-nlp-model-dir
       containers:
       - name: minion-knowledge-graph
         image: "{{ .Values.image.repository | default .Values.global.minions.image.repository | default .Values.global.image.repository | default .Values.defaultImage.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Values.global.minions.image.tag | default .Values.global.image.tag | default .Values.defaultImage.tag }}"
@@ -31,16 +47,18 @@ See chart value file for details of the logic used to generate this setting valu
         livenessProbe:
           httpGet:
             path: "/healthz"
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 10
+            port: 6123
+          initialDelaySeconds: 600
+          periodSeconds: 60
+          timeoutSeconds: 30
+          failureThreshold: 3
+          successThreshold: 1
 {{- end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         env:
         - name: NODE_PORT
-          value: "80"
+          value: "6123"
         - name: REGISTRY_URL
           value: "http://registry-api/v0"
         - name: ENABLE_MULTI_TENANTS
@@ -56,12 +74,12 @@ See chart value file for details of the logic used to generate this setting valu
         - name: INTERNAL_URL
           value: "http://minion-knowledge-graph"
         - name: NEO4J_URL
-          value: {{ Values.neo4j.url | default "" }}
+          value: {{ .Values.neo4j.url | default "" }}
         - name: NEO4J_USERNAME
-          value: {{ Values.neo4j.username | default "" }}
+          value: {{ .Values.neo4j.username | default "" }}
 {{- if .Values.neo4j.password }}
         - name: NEO4J_PASSWORD
-          value: {{ Values.neo4j.password | default "" }}
+          value: {{ .Values.neo4j.password | default "" }}
 {{- else }}
         - name: NEO4J_PASSWORD
           valueFrom:
@@ -74,3 +92,8 @@ See chart value file for details of the logic used to generate this setting valu
             secretKeyRef:
               name: auth-secrets
               key: jwt-secret
+        - name: NLP_MODEL_FILE_PATH
+          value: "/tmp-nlp-model-dir/en_entity_linking_wiki_03_lg.tar.gz"
+        volumeMounts:
+          - name: tmp-model-file-dir
+            mountPath: /tmp-nlp-model-dir
