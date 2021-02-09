@@ -96,7 +96,7 @@ async function processTextWithNlpModel(text: string): Promise<WikiEnity[]> {
             const entity: WikiEnity = {
                 name: name ? name : "",
                 label: label ? label : "",
-                kb_id: kb_id ? kb_id : ""
+                kb_id: isEntityId(kb_id) ? kb_id : ""
             };
             return entity;
         })
