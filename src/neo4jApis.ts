@@ -48,7 +48,7 @@ export async function createRelationship(
 ): Promise<Integer> {
     const result = await txc.run(
         `MATCH (a),(b) WHERE id(a) = $id1 AND id(b) = $id2
-         CREATE (a)-[r${relType ? `${relType}` : ""} $props]->(b)
+         CREATE (a)-[r${relType ? `:${relType}` : ""} $props]->(b)
          RETURN id(r) AS id`,
         {
             props,
