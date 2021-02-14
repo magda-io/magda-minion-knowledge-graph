@@ -2,27 +2,33 @@
     "$schema": "http://json-schema.org/schema#",
     "title": "Dataset Wikidata Entities",
     "description": "Aspect containing a list of wikidata entities that are relevant to the dataset. Reverse claims won't be included in aspect but will be recorded by graph DB instead, due to potential quality.",
-    "type": "array",
-    "items": {
-        "type": "object",
-        "uniqueItems": true,
-        "properties": {
-            "name": {
-                "type": "string",
-                "title": "Entity Name",
-                "description": "The name of the entity."
-            },
-            "label": {
-                "type": "string",
-                "title": "Entity Label",
-                "description": "A label that indicates the type of the entity. e.g. ORG, LOC etc. See https://spacy.io/api/annotation"
-            },
-            "kb_id": {
-                "type": "string",
-                "title": "Knowledge Base ID",
-                "description": "The id of the enity in knowledge base"
+    "type": "object",
+    "properties": {
+        "entities": {
+            "title": "Relevant wiki entities",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "uniqueItems": true,
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Entity Name",
+                        "description": "The name of the entity."
+                    },
+                    "label": {
+                        "type": "string",
+                        "title": "Entity Label",
+                        "description": "A label that indicates the type of the entity. e.g. ORG, LOC etc. See https://spacy.io/api/annotation"
+                    },
+                    "kb_id": {
+                        "type": "string",
+                        "title": "Knowledge Base ID",
+                        "description": "The id of the enity in knowledge base"
+                    }
+                },
+                "required": ["name"]
             }
-        },
-        "required": ["name"]
+        }
     }
 }

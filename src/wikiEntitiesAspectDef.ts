@@ -10,4 +10,6 @@ export type WikiEnity = {
     kb_id?: string;
 };
 
-export type WikiEnitiesAspect = WikiEnity[];
+export type WikiEnitiesAspect = {
+    entities: WikiEnity[];
+};

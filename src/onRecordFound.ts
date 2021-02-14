@@ -145,12 +145,18 @@ async function updateRegistry(
     registry: Registry,
     entities: WikiEnity[]
 ) {
-    await registry.putRecordAspect(
-        record.id,
-        "dataset-wiki-entities",
-        entities,
-        record.tenantId
-    );
+    try {
+        console.log("Posting aspect `dataset-wiki-entities`: ", entities);
+        await registry.putRecordAspect(
+            record.id,
+            "dataset-wiki-entities",
+            { entities },
+            record.tenantId
+        );
+    } catch (e) {
+        console.log(e);
+        console.log(`entities: ${entities}`);
+    }
 }
 
 async function updateGraphDb(
