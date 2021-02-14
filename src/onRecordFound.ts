@@ -10,7 +10,7 @@ import { getManyEntities, getEntities } from "./wikidataApis";
 import matchWikiEnityByKeywords from "./matchWikiEnityByKeywords";
 import { uniqBy } from "lodash";
 import { MinimisedEntity, isEntityId } from "wikidata-sdk";
-import { Driver, Integer, Session } from "neo4j-driver";
+import { Driver, Integer } from "neo4j-driver";
 import {
     findNodes,
     namespaceList,
@@ -164,20 +164,16 @@ async function updateGraphDb(
     record: Record,
     wikiEntityItems: MinimisedEntity[]
 ) {
-    const session = await neo4jDriver.session();
-    try {
-        const datasetNodeId = await createDatasetNode(session, record);
-        await createNodesForWikiEntityItems(
-            session,
-            datasetNodeId,
-            wikiEntityItems
-        );
-    } finally {
-        session.close();
-    }
+    const datasetNodeId = await createDatasetNode(neo4jDriver, record);
+    await createNodesForWikiEntityItems(
+        neo4jDriver,
+        datasetNodeId,
+        wikiEntityItems
+    );
 }
 
-async function createDatasetNode(session: Session, record: Record) {
+async function createDatasetNode(neo4jDriver: Driver, record: Record) {
+    const session = await neo4jDriver.session();
     const txc = await session.beginTransaction();
     try {
         const nodes = await findNodes(
@@ -210,6 +206,10 @@ async function createDatasetNode(session: Session, record: Record) {
     } catch (e) {
         await txc.rollback();
         throw e;
+    } finally {
+        if (session) {
+            session.close();
+        }
     }
 }
 
@@ -218,16 +218,17 @@ async function createDatasetNode(session: Session, record: Record) {
  * If not, will attempt creating the node.
  * If the `nameLabel` parameter is not provided, the function will try to retrieve the entity name label via wikidata API
  *
- * @param {Session} session neo4j driver
+ * @param {Driver} neo4jDriver neo4j driver
  * @param {string} wikiId the ID of wikidata entity. In form of `Q1231`.
  * @param {string} [nameLabel] Optional. If not provided, will try to retrieve the entity name label by `wikiId` via wikidata API instead.
  * @return {*}
  */
 async function checkCreateWikiNode(
-    session: Session,
+    neo4jDriver: Driver,
     wikiId: string,
     nameLabel?: string
 ) {
+    const session = await neo4jDriver.session();
     const txc = await session.beginTransaction();
     try {
         const nodes = await findNodes(
@@ -268,6 +269,10 @@ async function checkCreateWikiNode(
     } catch (e) {
         await txc.rollback();
         throw e;
+    } finally {
+        if (session) {
+            session.close();
+        }
     }
 }
 
@@ -277,7 +282,7 @@ const createRelTypeFromString = (label: string) =>
 /**
  *
  *
- * @param {Session} session
+ * @param {Driver} neo4jDriver
  * @param {Integer} startNodeId
  * @param {Integer} endNodeId
  * @param {string} relType Optional; The type of the created relationship.
@@ -290,7 +295,7 @@ const createRelTypeFromString = (label: string) =>
  * @return {*}
  */
 async function checkCreateWikiNodeRel(
-    session: Session,
+    neo4jDriver: Driver,
     startNodeId: Integer,
     endNodeId: Integer,
     relType: string,
@@ -298,6 +303,7 @@ async function checkCreateWikiNodeRel(
     relId?: string,
     namespace?: UriNamespace
 ) {
+    const session = await neo4jDriver.session();
     const txc = await session.beginTransaction();
     try {
         const rels = await getRelationshipBetweenNodes(
@@ -350,18 +356,22 @@ async function checkCreateWikiNodeRel(
     } catch (e) {
         await txc.rollback();
         throw e;
+    } finally {
+        if (session) {
+            session.close();
+        }
     }
 }
 
 export async function createNodesForWikiEntityItems(
-    session: Session,
+    neo4jDriver: Driver,
     datasetNodeId: Integer,
     wikiEntityItems: MinimisedEntity[]
 ) {
     await Promise.all(
         wikiEntityItems.map(async wikiEntityItem => {
             await createNodeForWikiEntityItem(
-                session,
+                neo4jDriver,
                 datasetNodeId,
                 wikiEntityItem
             );
@@ -370,18 +380,18 @@ export async function createNodesForWikiEntityItems(
 }
 
 export async function createNodeForWikiEntityItem(
-    session: Session,
+    neo4jDriver: Driver,
     datasetNodeId: Integer,
     wikiEntityItem: MinimisedEntity
 ) {
     const wikiNodeId = await checkCreateWikiNode(
-        session,
+        neo4jDriver,
         wikiEntityItem.id,
         wikiEntityItem.labels?.["en"]
     );
 
     await checkCreateWikiNodeRel(
-        session,
+        neo4jDriver,
         datasetNodeId,
         wikiNodeId,
         "RELEVANT",
@@ -400,12 +410,12 @@ export async function createNodeForWikiEntityItem(
             await Promise.all(
                 claimValues.map(async wikiEntityId => {
                     const propWikiNodeId = await checkCreateWikiNode(
-                        session,
+                        neo4jDriver,
                         wikiEntityId
                     );
 
                     await checkCreateWikiNodeRel(
-                        session,
+                        neo4jDriver,
                         wikiNodeId,
                         propWikiNodeId,
                         undefined,
