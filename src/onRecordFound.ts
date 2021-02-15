@@ -272,8 +272,16 @@ async function checkCreateWikiNode(
     }
 }
 
-const createRelTypeFromString = (label: string) =>
-    label.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase();
+const createRelTypeFromString = (label: string) => {
+    const relTypeStr = label.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase();
+    if (!relTypeStr) {
+        return "UNNAMED_REL_TYPE";
+    }
+    if (/^[\d]+/.test(relTypeStr)) {
+        return "R" + relTypeStr;
+    }
+    return relTypeStr;
+};
 
 const getLabelFromFirstEntities = (
     entities: MinimisedEntity[],
