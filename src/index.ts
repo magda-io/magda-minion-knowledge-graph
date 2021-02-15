@@ -84,7 +84,10 @@ nlpModelPromise
 
         const driver = neo4j.driver(
             argv.neo4jUrl,
-            neo4j.auth.basic(argv.neo4jUser, argv.neo4jPassword)
+            neo4j.auth.basic(argv.neo4jUser, argv.neo4jPassword),
+            {
+                connectionAcquisitionTimeout: 600000
+            }
         );
 
         return minion({

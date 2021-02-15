@@ -19,7 +19,7 @@ import {
     createRelationship,
     UriNamespace
 } from "./neo4jApis";
-//import wdk from "wikidata-sdk";
+import cleanString from "./cleanString";
 
 /**
  * When minion works under async mode, there might be a racing condition when `onRecordFound` is resolved too quick (before one registry event cycle finishs).
@@ -82,6 +82,7 @@ async function processRecord(
 }
 
 async function processTextWithNlpModel(text: string): Promise<WikiEnity[]> {
+    text = cleanString(text);
     const rawEntities = await executePython<string[][]>(
         "process_text.py",
         text,
@@ -208,7 +209,7 @@ async function createDatasetNode(neo4jDriver: Driver, record: Record) {
         throw e;
     } finally {
         if (session) {
-            session.close();
+            await session.close();
         }
     }
 }
@@ -246,12 +247,7 @@ async function checkCreateWikiNode(
         } else {
             if (!nameLabel) {
                 const entities = await getEntities([wikiId]);
-                if (!entities?.[0]?.labels?.["en"]) {
-                    throw new Error(
-                        `Error@checkCreateWikiNode: Can't retrieve entity name label via wikidata API by ID: \`${wikiId}\``
-                    );
-                }
-                nameLabel = entities[0].labels["en"];
+                nameLabel = getLabelFromFirstEntities(entities, wikiId);
             }
 
             wikiNodeId = await createNode(
@@ -271,7 +267,7 @@ async function checkCreateWikiNode(
         throw e;
     } finally {
         if (session) {
-            session.close();
+            await session.close();
         }
     }
 }
@@ -279,6 +275,24 @@ async function checkCreateWikiNode(
 const createRelTypeFromString = (label: string) =>
     label.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase();
 
+const getLabelFromFirstEntities = (
+    entities: MinimisedEntity[],
+    entityId: string
+) => {
+    if (entities?.[0]?.labels?.["en"]) {
+        return entities[0].labels["en"];
+    }
+    console.warn(
+        `Warn: Can't retrieve entity name label by label field for entity: \`${entityId}\``
+    );
+    if (entities?.[0]?.descriptions?.["en"]) {
+        return entities[0].descriptions["en"];
+    }
+    console.warn(
+        `Warn: Can't retrieve entity name label by either label or descriptions for entity ${entityId}`
+    );
+    return "Unnamed Entity";
+};
 /**
  *
  *
@@ -328,12 +342,8 @@ async function checkCreateWikiNodeRel(
                     );
                 }
                 const entities = await getEntities([relId]);
-                if (!entities?.[0]?.labels?.["en"]) {
-                    throw new Error(
-                        `Error@checkCreateWikiNode: Can't retrieve entity name label via wikidata API by ID: \`${relId}\``
-                    );
-                }
-                relType = createRelTypeFromString(entities[0].labels["en"]);
+                const label = getLabelFromFirstEntities(entities, relId);
+                relType = createRelTypeFromString(label);
             }
             wikiRelId = await createRelationship(
                 txc,
@@ -358,7 +368,7 @@ async function checkCreateWikiNodeRel(
         throw e;
     } finally {
         if (session) {
-            session.close();
+            await session.close();
         }
     }
 }
