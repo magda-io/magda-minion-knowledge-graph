@@ -8,6 +8,7 @@ import { pipeRemoteFile, pipeLocalFile } from "./utils";
 import { Writable } from "stream";
 import neo4j from "neo4j-driver";
 import { partial } from "lodash";
+import { setContactInfo } from "./wikidataApis";
 
 const NLP_MODLE_PATH = path.resolve("./psrc/models");
 const DEFAULT_MODLE_FILE_NAME = "en_entity_linking_wiki_03_lg.tar.gz";
@@ -72,6 +73,11 @@ nlpModelPromise
                     default: process.env.NEO4J_PASSWORD,
                     type: "string"
                 })
+                .options("contactInfo", {
+                    describe: "contactInfo required for accessing wikidata API",
+                    default: process.env.CONTACT_INFO,
+                    type: "string"
+                })
         );
 
         if (!argv.neo4jUrl) {
@@ -81,6 +87,13 @@ nlpModelPromise
         if (!argv.neo4jUser) {
             throw new Error("`neo4jUser` cannot be empty!");
         }
+
+        if (!argv.contactInfo) {
+            throw new Error("`contactInfo` cannot be empty!");
+        }
+
+        // --- set contactInfo for accessing wikidata API
+        setContactInfo(argv.contactInfo);
 
         const driver = neo4j.driver(
             argv.neo4jUrl,

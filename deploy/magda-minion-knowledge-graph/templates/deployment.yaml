@@ -94,6 +94,8 @@ See chart value file for details of the logic used to generate this setting valu
               key: jwt-secret
         - name: NLP_MODEL_FILE_PATH
           value: "/tmp-nlp-model-dir/en_entity_linking_wiki_03_lg.tar.gz"
+        - name: CONTACT_INFO
+          value: {{ .Values.contactInfo | required "A non-empty `.Values.contactInfo` is required for Chart `magda-minion-graph`." | quote }}
         volumeMounts:
           - name: tmp-model-file-dir
             mountPath: /tmp-nlp-model-dir

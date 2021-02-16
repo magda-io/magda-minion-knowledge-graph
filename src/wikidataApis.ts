@@ -5,8 +5,13 @@ import wdk, {
 } from "wikidata-sdk";
 import { SearchResult, SparqlResults } from "wikibase-types";
 import fetch from "node-fetch";
+import delay from "./delay";
+const packageInfo = require("../package.json");
 
 let wikiApiAccessPromise: null | Promise<any> = null;
+let contactInfo: string = "";
+
+export const setContactInfo = (info: string) => (contactInfo = info);
 
 async function request<T>(url: string, body?: string): Promise<T> {
     while (wikiApiAccessPromise) {
@@ -19,20 +24,43 @@ async function request<T>(url: string, body?: string): Promise<T> {
             wikiApiAccessPromise = null;
         }
     }
+    const userAgent = `${packageInfo.name}/${packageInfo.version} (${
+        contactInfo ? contactInfo : "No Contact Info Set"
+    }) wikidata-sdk/7.9.0 node-fetch/2.6.1`;
 
     let req;
     if (body) {
         req = fetch(url, {
             method: "POST",
             body,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": userAgent
+            }
         });
     } else {
-        req = fetch(url);
+        req = fetch(url, {
+            headers: {
+                "User-Agent": userAgent
+            }
+        });
     }
+
+    req = req.then(async res => {
+        await delay(1);
+        return res;
+    });
+
     wikiApiAccessPromise = req;
     const res = await req;
-    return await res.json();
+    const jsonStr = await res.text();
+    try {
+        return JSON.parse(jsonStr);
+    } catch (e) {
+        console.log(e);
+        console.log(jsonStr);
+        throw e;
+    }
 }
 
 export async function searchEntities(
