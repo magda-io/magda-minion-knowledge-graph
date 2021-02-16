@@ -22,6 +22,7 @@ import {
     closeSession
 } from "./neo4jApis";
 import cleanString from "./cleanString";
+import cache from "./cache";
 
 /**
  * When minion works under async mode, there might be a racing condition when `onRecordFound` is resolved too quick (before one registry event cycle finishs).
@@ -35,11 +36,15 @@ export default async function onRecordFound(
     registry: Registry
 ) {
     const startTime = new Date().getTime();
+    console.log(`Start to process record ${record.id}...`);
     await processRecord(neo4jDriver, record, registry);
     const timeSpent = new Date().getTime() - startTime;
     if (timeSpent < MIN_SPENT_TIME) {
         await delay(MIN_SPENT_TIME - timeSpent);
     }
+    console.log(
+        `Complete processing record ${record.id}. Spent ${timeSpent} milseconds...`
+    );
 }
 
 async function processRecord(
@@ -64,7 +69,14 @@ async function processRecord(
     entities = uniqBy(entities, item => item.kb_id);
 
     const wikiIds = entities.map(item => item.kb_id);
-    const wikiEnityitems = await getManyEntities(wikiIds);
+
+    const wrapParameters = (wikiIds as any[]).concat(
+        async (keys: string[]) => await getManyEntities(keys)
+    );
+    const wikiEnityitems = (await cache.wrap.apply(
+        {},
+        wrapParameters
+    )) as MinimisedEntity[];
 
     const nameLabelList: { [id: string]: string } = {};
     wikiEnityitems.forEach(
@@ -246,7 +258,10 @@ async function checkCreateWikiNode(
             wikiNodeId = nodes[0].identity;
         } else {
             if (!nameLabel) {
-                const entities = await getEntities([wikiId]);
+                const entities = await cache.wrap<MinimisedEntity[]>(
+                    wikiId,
+                    async (key: string) => await getEntities([key])
+                );
                 nameLabel = getLabelFromFirstEntities(entities, wikiId);
             }
 
@@ -347,7 +362,10 @@ async function checkCreateWikiNodeRel(
                         "Error@checkCreateWikiNodeRel: `relId` must be provided when `relType` was not provided."
                     );
                 }
-                const entities = await getEntities([relId]);
+                const entities = await cache.wrap<MinimisedEntity[]>(
+                    relId,
+                    async (key: string) => await getEntities([key])
+                );
                 const label = getLabelFromFirstEntities(entities, relId);
                 relType = createRelTypeFromString(label);
             }

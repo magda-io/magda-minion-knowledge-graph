@@ -5,7 +5,7 @@ import wdk, {
 } from "wikidata-sdk";
 import { SearchResult, SparqlResults } from "wikibase-types";
 import fetch from "node-fetch";
-import delay from "./delay";
+
 const packageInfo = require("../package.json");
 
 let wikiApiAccessPromise: null | Promise<any> = null;
@@ -45,11 +45,6 @@ async function request<T>(url: string, body?: string): Promise<T> {
             }
         });
     }
-
-    req = req.then(async res => {
-        await delay(1);
-        return res;
-    });
 
     wikiApiAccessPromise = req;
     const res = await req;

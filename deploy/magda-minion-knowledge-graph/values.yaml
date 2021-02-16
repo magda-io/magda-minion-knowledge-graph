@@ -42,3 +42,6 @@ neo4j:
   # leave blank will auto-load from the secret.
   password: 
 
+# -- The conact information (e.g. email address) to be set as a part of User Agent header as required by wikidata API:
+# https://meta.wikimedia.org/wiki/User-Agent_policy
+contactInfo:

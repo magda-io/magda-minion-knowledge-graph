@@ -2,6 +2,8 @@ import tokeniseString from "./tokeniseString";
 import { searchEntities } from "./wikidataApis";
 import { SearchResult } from "wikibase-types/dist";
 import { WikiEnity } from "./wikiEntitiesAspectDef";
+import cache from "./cache";
+import md5 from "md5";
 
 const searchResult2Entity = (searchResult: SearchResult) => ({
     name: searchResult.label,
@@ -9,7 +11,7 @@ const searchResult2Entity = (searchResult: SearchResult) => ({
     kb_id: searchResult.id
 });
 
-export default async function matchWikiEnityByKeywords(
+async function doMatchWikiEnityByKeywords(
     keywords: string
 ): Promise<WikiEnity[]> {
     const result = await searchEntities(keywords);
@@ -29,4 +31,13 @@ export default async function matchWikiEnityByKeywords(
         }
     }
     return entities;
+}
+
+export default async function matchWikiEnityByKeywords(
+    keywords: string
+): Promise<WikiEnity[]> {
+    return await cache.wrap<WikiEnity[]>(
+        md5(keywords),
+        doMatchWikiEnityByKeywords
+    );
 }
