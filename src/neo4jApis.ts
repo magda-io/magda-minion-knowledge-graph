@@ -1,5 +1,14 @@
-import { Transaction, Node, Relationship, Integer } from "neo4j-driver";
+import {
+    Transaction,
+    Node,
+    Relationship,
+    Integer,
+    Session,
+    Driver,
+    SessionMode
+} from "neo4j-driver";
 import urijs from "urijs";
+import delay from "./delay";
 
 type PropType = {
     [key: string]: any;
@@ -178,3 +187,37 @@ export const namespaceList = {
     wd: new UriNamespace("http://www.wikidata.org/entity/"),
     wdt: new UriNamespace("http://www.wikidata.org/prop/direct/")
 };
+
+const MAX_CONNECTION_NUMBER = 30;
+let currentConnectionNumber = 0;
+
+export async function openSession(
+    driver: Driver,
+    config?: {
+        defaultAccessMode?: SessionMode;
+        bookmarks?: string | string[];
+        fetchSize?: number;
+        database?: string;
+    }
+): Promise<Session> {
+    while (currentConnectionNumber >= MAX_CONNECTION_NUMBER) {
+        await delay(1000);
+    }
+    try {
+        currentConnectionNumber++;
+        const session = await driver.session(config);
+        return session;
+    } catch (e) {
+        currentConnectionNumber--;
+        throw e;
+    }
+}
+
+export async function closeSession(session: Session) {
+    if (!session) {
+        console.warn(`Attempt to close empty session variable.`);
+        return;
+    }
+    await session.close();
+    currentConnectionNumber--;
+}

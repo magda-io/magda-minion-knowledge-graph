@@ -17,7 +17,9 @@ import {
     createNode,
     getRelationshipBetweenNodes,
     createRelationship,
-    UriNamespace
+    UriNamespace,
+    openSession,
+    closeSession
 } from "./neo4jApis";
 import cleanString from "./cleanString";
 
@@ -174,7 +176,7 @@ async function updateGraphDb(
 }
 
 async function createDatasetNode(neo4jDriver: Driver, record: Record) {
-    const session = await neo4jDriver.session();
+    const session = await openSession(neo4jDriver);
     const txc = await session.beginTransaction();
     try {
         const nodes = await findNodes(
@@ -208,9 +210,7 @@ async function createDatasetNode(neo4jDriver: Driver, record: Record) {
         await txc.rollback();
         throw e;
     } finally {
-        if (session) {
-            await session.close();
-        }
+        await closeSession(session);
     }
 }
 
@@ -229,7 +229,7 @@ async function checkCreateWikiNode(
     wikiId: string,
     nameLabel?: string
 ) {
-    const session = await neo4jDriver.session();
+    const session = await openSession(neo4jDriver);
     const txc = await session.beginTransaction();
     try {
         const nodes = await findNodes(
@@ -266,9 +266,7 @@ async function checkCreateWikiNode(
         await txc.rollback();
         throw e;
     } finally {
-        if (session) {
-            await session.close();
-        }
+        await closeSession(session);
     }
 }
 
@@ -325,7 +323,7 @@ async function checkCreateWikiNodeRel(
     relId?: string,
     namespace?: UriNamespace
 ) {
-    const session = await neo4jDriver.session();
+    const session = await openSession(neo4jDriver);
     const txc = await session.beginTransaction();
     try {
         const rels = await getRelationshipBetweenNodes(
@@ -375,9 +373,7 @@ async function checkCreateWikiNodeRel(
         await txc.rollback();
         throw e;
     } finally {
-        if (session) {
-            await session.close();
-        }
+        await closeSession(session);
     }
 }
 
