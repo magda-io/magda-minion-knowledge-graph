@@ -5,6 +5,7 @@ import wdk, {
 } from "wikidata-sdk";
 import { SearchResult, SparqlResults } from "wikibase-types";
 import fetch from "node-fetch";
+import delay from "./delay";
 
 const packageInfo = require("../package.json");
 
@@ -75,6 +76,101 @@ export async function searchEntities(
     } else {
         return searchResult;
     }
+}
+
+const GET_ENTITY_WAIT_TIME = 1000;
+const GET_ENTITY_WAIT_NUMBER = 10;
+type PENDING_FETCH_ENTITY_ITEM_TYPE = {
+    id: string;
+    promise: Promise<MinimisedEntity>;
+    isResolved: boolean;
+    resolve: (value?: MinimisedEntity | PromiseLike<MinimisedEntity>) => void;
+    reject: (reason?: any) => void;
+};
+const pendingFetchEntityItems: PENDING_FETCH_ENTITY_ITEM_TYPE[] = [];
+/**
+ * Auto combine multiple single entity fetching requests to one request that retrieves multiple entities in one go.
+ * By default, the function will wait `GET_ENTITY_APP_WAIT_TIME` milsecond or accumulate `GET_ENTITY_WAIT_NUMBER` entity
+ *
+ * @export
+ * @param {string} id The id of the wiki Entity to be fetched
+ * @param {(
+ *         ids: string[],
+ *         languages?: string[],
+ *         props?: string[],
+ *         format?: string,
+ *         redirects?: boolean
+ *     ) => Promise<MinimisedEntity[]>} [fetchMultiEntitiesFunc=getEntities] This parameter is only for test cases. By default, it uses `getManyEntities`.
+ * @param {number} [getEntityWaitTime=GET_ENTITY_WAIT_TIME] This parameter is only for test cases.
+ * @param {number} [getEntityWaitNumber=GET_ENTITY_WAIT_NUMBER] This parameter is only for test cases.
+ * @return {*}  {Promise<MinimisedEntity>}
+ */
+export async function getEntityAgg(
+    id: string,
+    fetchMultiEntitiesFunc: (
+        ids: string[],
+        languages?: string[],
+        props?: string[],
+        format?: string,
+        redirects?: boolean
+    ) => Promise<MinimisedEntity[]> = getManyEntities,
+    getEntityWaitTime: number = GET_ENTITY_WAIT_TIME,
+    getEntityWaitNumber: number = GET_ENTITY_WAIT_NUMBER
+): Promise<MinimisedEntity> {
+    const pendingItemWithSameId = pendingFetchEntityItems.find(
+        item => item.id === id
+    );
+    if (pendingItemWithSameId) {
+        return await pendingItemWithSameId.promise;
+    }
+
+    let pendingFetchItem: PENDING_FETCH_ENTITY_ITEM_TYPE;
+    const pendingFetchItemPromise = new Promise((resolve, reject) => {
+        pendingFetchItem = {
+            id,
+            resolve,
+            reject,
+            isResolved: false
+        } as any;
+    });
+    pendingFetchItem.promise = pendingFetchItemPromise as Promise<
+        MinimisedEntity
+    >;
+
+    pendingFetchEntityItems.push(pendingFetchItem);
+
+    let processingItems: PENDING_FETCH_ENTITY_ITEM_TYPE[];
+
+    if (pendingFetchEntityItems.length >= getEntityWaitNumber) {
+        processingItems = pendingFetchEntityItems.splice(0);
+    } else {
+        await delay(getEntityWaitTime);
+        // if the promise is already resolve, it shouldn't try to consume the queue
+        // otherwise, consequence might be triggered earlier
+        processingItems = pendingFetchItem.isResolved
+            ? []
+            : pendingFetchEntityItems.splice(0);
+    }
+
+    if (processingItems.length) {
+        //  `processingItems` could be empty and consumed by other pending requests
+        try {
+            const fecthedItems = await fetchMultiEntitiesFunc(
+                processingItems.map(item => item.id)
+            );
+            fecthedItems.forEach((value, idx) => {
+                processingItems[idx].isResolved = true;
+                processingItems[idx].resolve(value);
+            });
+        } catch (e) {
+            processingItems.forEach(item => {
+                item.reject(e);
+            });
+            throw e;
+        }
+    }
+
+    return await pendingFetchItem.promise;
 }
 
 export async function getEntities<T = MinimisedEntity>(

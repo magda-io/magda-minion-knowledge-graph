@@ -6,10 +6,10 @@ import delay from "./delay";
 import { WikiEnity } from "./wikiEntitiesAspectDef";
 import executePython from "./executePython";
 import path from "path";
-import { cachifyMultiple } from "./cache";
+import { cachifyMultiple, cachify } from "./cache";
 import {
     getManyEntities as doGetManyEntities,
-    getEntities as doGetEntities
+    getEntityAgg as doGetEntities
 } from "./wikidataApis";
 import matchWikiEnityByKeywords from "./matchWikiEnityByKeywords";
 import { uniqBy } from "lodash";
@@ -28,7 +28,7 @@ import {
 import cleanString from "./cleanString";
 
 const getManyEntities = cachifyMultiple(doGetManyEntities, true);
-const getEntities = cachifyMultiple(doGetEntities, true);
+const getEntity = cachify(doGetEntities, true);
 
 /**
  * When minion works under async mode, there might be a racing condition when `onRecordFound` is resolved too quick (before one registry event cycle finishs).
@@ -257,8 +257,8 @@ async function checkCreateWikiNode(
             wikiNodeId = nodes[0].identity;
         } else {
             if (!nameLabel) {
-                const entities = await getEntities([wikiId]);
-                nameLabel = getLabelFromFirstEntities(entities, wikiId);
+                const entity = await getEntity(wikiId);
+                nameLabel = getLabelFromFirstEntities([entity], wikiId);
             }
 
             wikiNodeId = await createNode(
@@ -358,8 +358,8 @@ async function checkCreateWikiNodeRel(
                         "Error@checkCreateWikiNodeRel: `relId` must be provided when `relType` was not provided."
                     );
                 }
-                const entities = await getEntities([relId]);
-                const label = getLabelFromFirstEntities(entities, relId);
+                const entity = await getEntity(relId);
+                const label = getLabelFromFirstEntities([entity], relId);
                 relType = createRelTypeFromString(label);
             }
             wikiRelId = await createRelationship(
