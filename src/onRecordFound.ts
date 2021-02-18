@@ -6,7 +6,11 @@ import delay from "./delay";
 import { WikiEnity } from "./wikiEntitiesAspectDef";
 import executePython from "./executePython";
 import path from "path";
-import { getManyEntities, getEntities } from "./wikidataApis";
+import { cachifyMultiple } from "./cache";
+import {
+    getManyEntities as doGetManyEntities,
+    getEntities as doGetEntities
+} from "./wikidataApis";
 import matchWikiEnityByKeywords from "./matchWikiEnityByKeywords";
 import { uniqBy } from "lodash";
 import { MinimisedEntity, isEntityId } from "wikidata-sdk";
@@ -22,7 +26,9 @@ import {
     closeSession
 } from "./neo4jApis";
 import cleanString from "./cleanString";
-import cache from "./cache";
+
+const getManyEntities = cachifyMultiple(doGetManyEntities, true);
+const getEntities = cachifyMultiple(doGetEntities, true);
 
 /**
  * When minion works under async mode, there might be a racing condition when `onRecordFound` is resolved too quick (before one registry event cycle finishs).
@@ -69,14 +75,7 @@ async function processRecord(
     entities = uniqBy(entities, item => item.kb_id);
 
     const wikiIds = entities.map(item => item.kb_id);
-
-    const wrapParameters = (wikiIds as any[]).concat(
-        async (keys: string[]) => await getManyEntities(keys)
-    );
-    const wikiEnityitems = (await cache.wrap.apply(
-        {},
-        wrapParameters
-    )) as MinimisedEntity[];
+    const wikiEnityitems = await getManyEntities(wikiIds);
 
     const nameLabelList: { [id: string]: string } = {};
     wikiEnityitems.forEach(
@@ -258,10 +257,7 @@ async function checkCreateWikiNode(
             wikiNodeId = nodes[0].identity;
         } else {
             if (!nameLabel) {
-                const entities = await cache.wrap<MinimisedEntity[]>(
-                    wikiId,
-                    async (key: string) => await getEntities([key])
-                );
+                const entities = await getEntities([wikiId]);
                 nameLabel = getLabelFromFirstEntities(entities, wikiId);
             }
 
@@ -362,10 +358,7 @@ async function checkCreateWikiNodeRel(
                         "Error@checkCreateWikiNodeRel: `relId` must be provided when `relType` was not provided."
                     );
                 }
-                const entities = await cache.wrap<MinimisedEntity[]>(
-                    relId,
-                    async (key: string) => await getEntities([key])
-                );
+                const entities = await getEntities([relId]);
                 const label = getLabelFromFirstEntities(entities, relId);
                 relType = createRelTypeFromString(label);
             }

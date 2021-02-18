@@ -20,6 +20,49 @@
             "program": "${workspaceRoot}/test.py",
             "justMyCode": false,
             "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "inspector",
+            "name": "Mocha Debug Current File",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--require",
+                "ts-node/register",
+                "--require",
+                "tsconfig-paths/register",
+                "${file}"
+            ],
+            "env": {
+                "JWT_SECRET": "squirrel",
+                "SESSION_SECRET": "keyboard cat",
+                "USER_ID": "00000000-0000-4000-8000-000000000000"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "inspector",
+            "name": "Launch Minion",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+            "windows": {
+                "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node.cmd"
+            },
+            "args": [
+                "-r",
+                "${workspaceRoot}/node_modules/tsconfig-paths/register",
+                "src/index.ts"
+            ],
+            "env": {
+                "NODE_PORT": "6123",
+                "REGISTRY_URL": "http://localhost:6110",
+                "JWT_SECRET": "squirrel",
+                "SESSION_SECRET": "keyboard cat",
+                "USER_ID": "00000000-0000-4000-8000-000000000000"
+            },
+            "cwd": "${workspaceRoot}/magda-gateway"
         }
     ]
 }

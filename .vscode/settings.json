@@ -8,5 +8,8 @@
     "files.associations": {
         "*.json": "jsonc"
     },
-    "python.pythonPath": "/Users/t1000/miniconda3/envs/kg/bin/python"
+    "python.pythonPath": "/Users/t1000/miniconda3/envs/kg/bin/python",
+    "files.watcherExclude": {
+        "**/target": true
+    }
 }
