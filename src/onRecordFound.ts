@@ -54,6 +54,7 @@ export default async function onRecordFound(
         );
     } catch (e) {
         console.log(`Failed to process dataset ${record.id}. Error: ${e}`);
+        throw e;
     }
 }
 
