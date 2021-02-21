@@ -152,17 +152,22 @@ export async function getEntityAgg(
             : pendingFetchEntityItems.splice(0);
     }
 
-    if (processingItems.length) {
+    const itemKeys = processingItems.map(item => item.id);
+
+    if (itemKeys.length) {
         //  `processingItems` could be empty and consumed by other pending requests
         try {
-            const fecthedItems = await fetchMultiEntitiesFunc(
-                processingItems.map(item => item.id)
-            );
+            const fecthedItems = await fetchMultiEntitiesFunc(itemKeys);
             fecthedItems.forEach((value, idx) => {
                 processingItems[idx].isResolved = true;
                 processingItems[idx].resolve(value);
             });
         } catch (e) {
+            console.log(
+                `Error@getEntityAgg: failed to invoke fetchMultiEntitiesFunc with keys: ${JSON.stringify(
+                    itemKeys
+                )}`
+            );
             processingItems.forEach(item => {
                 item.reject(e);
             });
@@ -200,6 +205,7 @@ export async function getManyEntities<T = MinimisedEntity>(
     languages = languages ? languages : ["en"];
     const urls = wdk.getManyEntities(ids, languages, props, format, redirects);
     if (!urls?.length) {
+        console.log("ids:", ids, "urls:", urls);
         throw new Error("Invalid wikibase API request url array generated.");
     }
 

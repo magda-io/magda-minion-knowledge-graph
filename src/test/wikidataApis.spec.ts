@@ -15,6 +15,9 @@ describe("Wikidata APIs", () => {
             let callCount = 0;
 
             const dummyMultiEnityLoader: any = async (ids: string[]) => {
+                if (!ids.length) {
+                    throw new Error(`ids cannot be empty []!`);
+                }
                 callCount++;
                 return ids.map(
                     id => dummyValueItems.find(item => item.key === id).value
@@ -50,6 +53,46 @@ describe("Wikidata APIs", () => {
             );
         });
 
+        it("should process 50 request on 0~600ms interval when setting max no. to 10 and max. time to 500ms", async function(this) {
+            this.timeout(33000);
+            const totalSampleNumber = 50;
+            const dummyValueItems = new Array(totalSampleNumber)
+                .fill(0)
+                .map(item => ({
+                    key: "dummyKey_" + Math.random().toString(),
+                    value: "dummyValue_" + Math.random().toString()
+                }));
+
+            const callStack: string[][] = [];
+
+            const dummyMultiEnityLoader: any = async (ids: string[]) => {
+                if (!ids.length) {
+                    throw new Error(`ids cannot be empty []!`);
+                }
+                callStack.push(ids);
+                return ids.map(
+                    id => dummyValueItems.find(item => item.key === id).value
+                );
+            };
+
+            const resultValuesPromise: Promise<string>[] = [];
+            for (let i = 0; i < totalSampleNumber; i++) {
+                const delayTime = Math.ceil(Math.random() * 600);
+                await delay(delayTime);
+                const valuePromise = getEntityAgg(
+                    dummyValueItems[i].key,
+                    dummyMultiEnityLoader,
+                    500,
+                    10
+                );
+                resultValuesPromise.push(valuePromise as any);
+            }
+            const resultValues = await Promise.all(resultValuesPromise);
+            resultValues.forEach((value, idx) =>
+                expect(value).to.be.equal(dummyValueItems[idx].value)
+            );
+        });
+
         it("should hold on the request before reach the pending request limit.", async function(this) {
             this.timeout(8000);
             const dummyValueItems = new Array(25).fill(0).map(item => ({
@@ -60,6 +103,9 @@ describe("Wikidata APIs", () => {
             let callCount = 0;
 
             const dummyMultiEnityLoader: any = async (ids: string[]) => {
+                if (!ids.length) {
+                    throw new Error(`ids cannot be empty []!`);
+                }
                 callCount++;
                 return ids.map(
                     id => dummyValueItems.find(item => item.key === id).value

@@ -41,16 +41,20 @@ export default async function onRecordFound(
     record: Record,
     registry: Registry
 ) {
-    const startTime = new Date().getTime();
-    console.log(`Start to process record ${record.id}...`);
-    await processRecord(neo4jDriver, record, registry);
-    const timeSpent = new Date().getTime() - startTime;
-    if (timeSpent < MIN_SPENT_TIME) {
-        await delay(MIN_SPENT_TIME - timeSpent);
+    try {
+        const startTime = new Date().getTime();
+        console.log(`Start to process record ${record.id}...`);
+        await processRecord(neo4jDriver, record, registry);
+        const timeSpent = new Date().getTime() - startTime;
+        if (timeSpent < MIN_SPENT_TIME) {
+            await delay(MIN_SPENT_TIME - timeSpent);
+        }
+        console.log(
+            `Complete processing record ${record.id}. Spent ${timeSpent} milseconds...`
+        );
+    } catch (e) {
+        console.log(`Failed to process dataset ${record.id}. Error: ${e}`);
     }
-    console.log(
-        `Complete processing record ${record.id}. Spent ${timeSpent} milseconds...`
-    );
 }
 
 async function processRecord(
@@ -72,9 +76,26 @@ async function processRecord(
     if (keywordsEntities?.length) {
         entities = entities.concat(keywordsEntities);
     }
+    const rawEntities = entities;
     entities = uniqBy(entities, item => item.kb_id);
 
+    if (!entities.length) {
+        console.warn(`Cannot find any entities for dataset ID: ${record.id}
+        nlpContent: ${nlpContent}
+        datasetKeywords: ${datasetKeywords}`);
+        return;
+    }
+
     const wikiIds = entities.map(item => item.kb_id);
+    if (!wikiIds.length) {
+        console.warn(`Cannot recognise any wiki IDs for dataset ID: ${record.id}
+        nlpContent: ${nlpContent}
+        rawEntities: ${rawEntities}
+        entities: ${entities}
+        datasetKeywords: ${datasetKeywords}`);
+        return;
+    }
+
     const wikiEnityitems = await getManyEntities(wikiIds);
 
     const nameLabelList: { [id: string]: string } = {};

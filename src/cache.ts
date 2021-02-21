@@ -83,16 +83,18 @@ export function cachifyMultiple<T>(
             item => typeof item.value === "undefined"
         );
 
-        const retrievedMissedValues = await workLoadFunc(
-            missedKeysInfo.map(item => item.key)
-        );
+        if (missedKeysInfo.length) {
+            const retrievedMissedValues = await workLoadFunc(
+                missedKeysInfo.map(item => item.key)
+            );
 
-        await Promise.all(
-            retrievedMissedValues.map(async (value, idx) => {
-                valueList[missedKeysInfo[idx].idx].value = value;
-                await cache.set(missedKeysInfo[idx].key, value);
-            })
-        );
+            await Promise.all(
+                retrievedMissedValues.map(async (value, idx) => {
+                    valueList[missedKeysInfo[idx].idx].value = value;
+                    await cache.set(missedKeysInfo[idx].key, value);
+                })
+            );
+        }
 
         return valueList.map(item => item.value);
     };

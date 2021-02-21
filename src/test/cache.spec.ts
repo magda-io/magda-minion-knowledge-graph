@@ -82,6 +82,9 @@ describe("Cache Manager", () => {
             );
 
             const dummyWorkLoad = (keys: string[]) => {
+                if (!keys.length) {
+                    throw new Error(`dummyWorkLoad cannot accept empty []`);
+                }
                 const values = keys.map(key => {
                     if (dummyData[key].calledKey) {
                         throw new Error(
@@ -157,6 +160,9 @@ describe("Cache Manager", () => {
             );
 
             const dummyWorkLoad = (keys: string[]) => {
+                if (!keys.length) {
+                    throw new Error(`dummyWorkLoad cannot accept empty []`);
+                }
                 const values = keys.map(key => {
                     if (dummyData[key].calledKey) {
                         throw new Error(
